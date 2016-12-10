@@ -19,7 +19,7 @@ class Chip8tleCore
 
 	public:
 		//methods
-		Chip8tleCore();
+		 Chip8tleCore();
 		~Chip8tleCore();
 
 		//Opcodes
@@ -32,6 +32,15 @@ class Chip8tleCore
 void sys()
 {
 	PC = (opcode & 0x0fff);
+}
+
+void Chip8tleCore::cls() {
+	int i, j;
+	for(i=0; i < SCREEN_W; i++) {
+		for(j=0; j < SCREEN_H; j++) {
+			scree
+		}
+	}
 }
 
 void ret()
