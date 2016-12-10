@@ -15,10 +15,24 @@ class Chip8tleCore
 		unsigned char DT;  			//Delay Timer 																8bits
 		unsigned char ST; 			//Sound Timer 																8bits
 		unsigned short stack[16];	//Stack for PC																16bits/ea
+		unsigned short opcode 		//Opcode 																	16bits
 
 	public:
+		//methods
+		Chip8tleCore();
+		~Chip8tleCore();
+
 		//Opcodes
-		void *opcoder[35]();
+		void (*opcoder[35])();
 };
+
+Chip8tleCore::Chip8tleCore()
+{
+	PC = 0x200;
+	I = 0;
+	SP = 0;
+	opcode = 0;
+
+}
 
 #endif
