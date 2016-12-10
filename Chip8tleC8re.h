@@ -24,7 +24,26 @@ class Chip8tleCore
 
 		//Opcodes
 		void (*opcoder[35])();
+		void sys();
+		void ret();
+		void call();
 };
+
+void sys()
+{
+	PC = (opcode & 0x0fff);
+}
+
+void ret()
+{
+	SP--;
+	PC = stack[SP];
+}
+
+void call()
+{
+	
+}
 
 Chip8tleCore::Chip8tleCore()
 {
@@ -33,6 +52,10 @@ Chip8tleCore::Chip8tleCore()
 	SP = 0;
 	opcode = 0;
 
+	opcoder =
+	{
+		sys,ret,call
+	};
 }
 
 #endif
