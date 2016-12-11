@@ -21,28 +21,58 @@ class Chip8tleCore
 		//methods
 		Chip8tleCore();
 		~Chip8tleCore();
-
 		//Opcodes
 		void (*opcoder[35])();
+
+	private:	
 		void sys();
 		void ret();
 		void call();
+		void sne_kk();
+		void ld_kk();
+		void ld_y0();
+		void And();
 };
 
-void sys()
+void Chip8tleCore::sys()
 {
 	PC = (opcode & 0x0fff);
 }
 
-void ret()
+void Chip8tleCore::ret()
 {
 	SP--;
 	PC = stack[SP];
 }
 
-void call()
+void Chip8tleCore::call()
 {
-	
+	stack[SP] = PC;
+	PC = (opcode & 0x0fff);
+	SP++;
+}
+
+void Chip8tleCore::sne_kk()
+{
+	if(V[(opcode & 0x0f00) >> 8] != (opcode & 0x00ff))
+	{
+		PC = PC+2;
+	}
+}
+
+void Chip8tleCore::ld_kk()
+{
+	V[(opcode & 0x0f00) >> 8] = (opcode & 0x00ff); 
+}
+
+void Chip8tleCore::ld_y0()
+{
+	V[(opcode & 0x0f00) >> 8] = V[(opcode & 0x00f0) >> 4]; 
+}
+
+void Chip8tleCore::And()
+{
+	V[(opcode & 0x0f00) >> 8] = V[(opcode & 0x0f00) >> 8] & V[(opcode & 0x00f0) >> 4]; 
 }
 
 Chip8tleCore::Chip8tleCore()
@@ -54,7 +84,7 @@ Chip8tleCore::Chip8tleCore()
 
 	opcoder =
 	{
-		sys,ret,call
+		sys,ret,call,sne_kk,ld_kk,ld_y0,And
 	};
 }
 
