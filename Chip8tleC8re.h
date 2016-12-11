@@ -32,6 +32,10 @@ class Chip8tleCore
 		void ld_kk();
 		void ld_y0();
 		void And();
+		void addy4();
+		void shr();
+		void shl();
+		void ldnn();
 };
 
 void Chip8tleCore::sys()
@@ -88,6 +92,46 @@ void Chip8tleCore::And()
 	V[(opcode & 0x0f00) >> 8] = V[(opcode & 0x0f00) >> 8] & V[(opcode & 0x00f0) >> 4]; 
 }
 
+void Chip8tleCore::addy4()
+{
+	V[(opcode & 0x0f00) >> 8] = (V[(opcode & 0x0f00) >> 8] + V[(opcode & 0x00f0) >> 4]) & 0x00ff;
+	if((V[(opcode & 0x0f00) >> 8] + V[(opcode & 0x00f0) >> 4]) > 0xff) 
+		V[0xf] = 0x01;
+}
+
+void Chip8tleCore::shr()
+{
+	if(v[opcode & 0x0f00] %2 != 0)
+	{
+		V[0xf] = 0x01;
+	}
+	else
+	{
+		V[0xf] = 0x0;
+	}
+
+	v[opcode & 0x0f00] >> 1;
+}
+
+void Chip8tleCore::shl()
+{
+	if(v[opcode & 0x0f00] & 0x80 == 0x80)
+	{
+		V[0xf] = 0x01;
+	}
+	else
+	{
+		V[0xf] = 0x0;
+	}
+
+	v[opcode & 0x0f00] << 1;
+}
+
+void Chip8tleCore::ldnn()
+{
+	I = opcode & 0x0fff
+}
+
 Chip8tleCore::Chip8tleCore()
 {
 	PC = 0x200;
@@ -97,7 +141,7 @@ Chip8tleCore::Chip8tleCore()
 
 	opcoder =
 	{
-		sys,ret,call,sne_kk,ld_kk,ld_y0,And
+		sys,ret,call,sne_kk,ld_kk,ld_y0,And,addy4,shr,shl,ldnn
 	};
 }
 
