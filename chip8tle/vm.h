@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include "res.h"
+#include <cstdlib>
+#include <ctime>
 
 #define SCREEN_H 32
 #define SCREEN_W 64
@@ -20,29 +22,61 @@ public:
 	Chip8tleExt ext;	// External
 
 	// Opcoder
-	unsigned short opcode 	//Opcode 	16bits
-	void (*opcoder[35])();
+	unsigned short opcode 	//	Opcode 	16 bits
+	void (*opcoder[35])();	//	Opcode table
 
-private:	
-	void sys();
-	void ret();
-	void call();
-	void sne_kk();
-	void ld_kk();
-	void ld_y0();
-	void And();
-	void addy4();
-	void shr();
-	void shl();
-	void ldnn();
+private:
+	void CLS_00E0();
+	void RET_00EE();
+	void SYS_0nnn();
+	void JP_1nnn();
+	void CALL_2nnn();
+	void SE_3xkk();
+	void SNE_4xkk();
+	void SE_5xy0();
+	void LD_6xkk();
+	void ADD_7xkk();
+	void LD_8xy0();
+	void OR_8xy1();
+	void AND_8xy2();
+	void XOR_8xy3();
+	void ADD_8xy4();
+	void SUB_8xy5();
+	void SHR_8xy6();
+	void SUBN_8xy7();
+	void SHL_8xyE();
+	void SNE_9xy0();
+	void LD_Annn();
+	void JP_Bnnn();
+	void RND_Cxkk();
+	void DRW_Dxyn();
+	void SKP_Ex9E();
+	void SKNP_ExA1();
+	void LD_Fx07();
+	void LD_Fx0A();
+	void LD_Fx15();
+	void LD_Fx18();
+	void ADD_Fx1E();
+	void LD_Fx29();
+	void LD_Fx33();
+	void LD_Fx55();
+	void LD_Fx65();
+
+	// Maybe not the datatypes
+	void Draw_Byte(unsigned char, int, int);
 };
 
 Chip8tleVM::Chip8tleVM() {
+	srand (time(NULL));
 	this->opcode  = 0;
 	this->opcoder = {	// 5 x 7 !!!!
-		sys  , ret, call , sne_kk, ld_kk, 
-		ld_y0, And, addy4, shr   , shl  , 
-		ldnn
+		CLS_00E0 , RET_00EE, SYS_0nnn , JP_1nnn , CALL_2nnn,
+		SE_3xkk  , SNE_4xkk, SE_5xy0  , LD_6xkk , ADD_7xkk , 
+		LD_8xy0  , OR_8xy1 , AND_8xy2 , XOR_8xy3, ADD_8xy4 ,
+		SUB_8xy5 , SHR_8xy6, SUBN_8xy7, SHL_8xyE, SNE_9xy0 ,
+		LD_Annn  , JP_Bnnn , RND_Cxkk , DRW_Dxyn, SKP_Ex9E ,
+		SKNP_ExA1, LD_Fx07 , LD_Fx0A  , LD_Fx15 , LD_Fx18  ,
+		ADD_Fx1E , LD_Fx29 , LD_Fx33  , LD_Fx55 , LD_Fx65
 	};
 	this->core = Chip8tleCore();
 	this->ext  = Chip8tleExt();
@@ -50,12 +84,56 @@ Chip8tleVM::Chip8tleVM() {
 }
 
 // Por aqui los metodos de cada opcode
-void Chip8tleVM::sys()
+void Chip8tleVM::SKP_Ex9E()
 {
-	PC = (opcode & 0x0fff);
+	if(ext.key[core.V[(opcode & 0x0f00)>>8]] == 1)
+	{
+		core.PC + 2;
+	}
 }
 
-void Chip8tleVM::CLS() {
+void Chip8tleVM::LD_Fx65()
+{
+	for(int i = 0;i<=((opcode & 0x0f00) >> 8);i++)
+	{
+		core.V[i] = ext.rem[core.I+i];
+	}
+}
+
+void Chip8tleVM::LD_Fx33()
+{
+	ext.rem[core.I] = core.V[(opcode & 0x0f00) >> 8] % 100;
+	ext.rem[core.I+1] = (core.V[(opcode & 0x0f00) >> 8] /10)%10;
+	ext.rem[core.I+2] = core.V[(opcode & 0x0f00) >> 8] % 10;
+}
+
+void Chip8tleVM::ADD_Fx1E()
+{
+	core.I = core.V[(opcode & 0x0f00) >> 8] + core.I;
+}
+
+void Chip8tleVM::LD_Fx15()
+{
+	core.DT = core.V[(opcode & 0x0f00) >> 8];
+}
+
+
+void Chip8tleVM::LD_Fx07()
+{
+	core.V[(opcode & 0x0f00) >> 8] = core.DT;
+}
+
+void Chip8tleVM::RND_Cxkk()
+{
+	core.V[(opcode & 0x0f00) >> 8] = rand()%256 & (opcode & 0x00ff);
+}
+
+void Chip8tleVM::SYS_0nnn()
+{
+	core.PC = (opcode & 0x0fff);
+}
+
+void Chip8tleVM::CLS_00E0() {
 
 	int i, j;
 	for(i=0; i < SCREEN_W; i++) {
@@ -65,21 +143,21 @@ void Chip8tleVM::CLS() {
 	}
 }
 
-void Chip8tleVM::ret()
+void Chip8tleVM::RET_00EE()
 {
-	SP--;
-	PC = stack[SP];
+	core.SP--;
+	core.PC = core.stack[core.SP];
 }
 
-void Chip8tleVM::JP() {
+void Chip8tleVM::JP_1nnn() {
 	core.PC = opcode & 0x0FFF;
 }
 
-void Chip8tleVM::call()
+void Chip8tleVM::CALL_2nnn()
 {
-	stack[SP] = PC;
-	PC = (opcode & 0x0FFF);
-	SP++;
+	core.stack[core.SP] = core.PC;
+	core.PC = (opcode & 0x0fff);
+	core.SP++;
 }
 
 void Chip8tleVM::SE_3xkk() {
@@ -88,11 +166,11 @@ void Chip8tleVM::SE_3xkk() {
 	if(t1 == t2) PC += 2;
 }
 
-void Chip8tleVM::sne_kk()
+void Chip8tleVM::SNE_4xkk()
 {
-	if(V[(opcode & 0x0f00) >> 8] != (opcode & 0x00ff))
+	if(core.V[(opcode & 0x0f00) >> 8] != (opcode & 0x00ff))
 	{
-		PC = PC+2;
+		core.PC = core.PC+2;
 	}
 }
 
@@ -102,9 +180,9 @@ void Chip8tleVM::SE_5xy0() {
 	if(core.V[X] == core.V[Y]) core.PC += 2;
 }
 
-void Chip8tleVM::ld_kk()
+void Chip8tleVM::LD_6xkk()
 {
-	V[(opcode & 0x0f00) >> 8] = (opcode & 0x00ff); 
+	core.V[(opcode & 0x0f00) >> 8] = (opcode & 0x00ff); 
 }
 
 void Chip8tleVM::ADD_7xkk() {
@@ -113,9 +191,9 @@ void Chip8tleVM::ADD_7xkk() {
 	core.V[X] += core.KK;
 }
 
-void Chip8tleVM::ld_y0()
+void Chip8tleVM::LD_8xy0()
 {
-	V[(opcode & 0x0f00) >> 8] = V[(opcode & 0x00f0) >> 4]; 
+	core.V[(opcode & 0x0f00) >> 8] = core.V[(opcode & 0x00f0) >> 4]; 
 }
 
 void Chip8tleVM::OR_8xy1() {
@@ -124,9 +202,9 @@ void Chip8tleVM::OR_8xy1() {
 	core.V[X] |= core.V[Y];
 }
 
-void Chip8tleVM::And()
+void Chip8tleVM::AND_8xy2()
 {
-	V[(opcode & 0x0f00) >> 8] = V[(opcode & 0x0f00) >> 8] & V[(opcode & 0x00f0) >> 4]; 
+	core.V[(opcode & 0x0f00) >> 8] = core.V[(opcode & 0x0f00) >> 8] & core.V[(opcode & 0x00f0) >> 4]; 
 }
 
 void Chip8tleVM::XOR_8xy3() {
@@ -135,11 +213,11 @@ void Chip8tleVM::XOR_8xy3() {
 	core.V[X] ^= core.V[Y];
 }
 
-void Chip8tleVM::addy4()
+void Chip8tleVM::ADD_8xy4()
 {
-	V[(opcode & 0x0f00) >> 8] = (V[(opcode & 0x0f00) >> 8] + V[(opcode & 0x00f0) >> 4]) & 0x00ff;
-	if((V[(opcode & 0x0f00) >> 8] + V[(opcode & 0x00f0) >> 4]) > 0xff) 
-		V[0xf] = 0x01;
+	core.V[(opcode & 0x0f00) >> 8] = (core.V[(opcode & 0x0f00) >> 8] + core.V[(opcode & 0x00f0) >> 4]) & 0x00ff;
+	if((core.V[(opcode & 0x0f00) >> 8] + core.V[(opcode & 0x00f0) >> 4]) > 0xff) 
+		core.V[0xf] = 0x01;
 }
 
 void Chip8tleVM::SUB_8xy5() {
@@ -148,18 +226,18 @@ void Chip8tleVM::SUB_8xy5() {
 	core.V[X] -= core.V[Y];
 }
 
-void Chip8tleVM::shr()
+void Chip8tleVM::SHR_8xy6()
 {
-	if(v[opcode & 0x0f00] %2 != 0)
+	if(core.V[opcode & 0x0f00] %2 != 0)
 	{
-		V[0xf] = 0x01;
+		core.V[0xf] = 0x01;
 	}
 	else
 	{
-		V[0xf] = 0x0;
+		core.V[0xf] = 0x0;
 	}
 
-	v[opcode & 0x0f00] >> 1;
+	core.V[opcode & 0x0f00] >> 1;
 }
 
 void Chip8tleVM::SUBN_8xy7() {
@@ -169,18 +247,18 @@ void Chip8tleVM::SUBN_8xy7() {
 	core.V[X] -= core.V[Y];
 }
 
-void Chip8tleVM::shl()
+void Chip8tleVM::SHL_8xyE()
 {
-	if(v[opcode & 0x0f00] & 0x80 == 0x80)
+	if(core.V[opcode & 0x0f00] & 0x80 == 0x80)
 	{
-		V[0xf] = 0x01;
+		core.V[0xf] = 0x01;
 	}
 	else
 	{
-		V[0xf] = 0x0;
+		core.V[0xf] = 0x0;
 	}
 
-	v[opcode & 0x0f00] << 1;
+	core.V[opcode & 0x0f00] << 1;
 }
 
 void Chip8tleVM::SNE_9xy0() {
@@ -189,9 +267,9 @@ void Chip8tleVM::SNE_9xy0() {
 	if(core.V[X] != core.V[Y]) core.PC += 2
 }
 
-void Chip8tleVM::ldnn()
+void Chip8tleVM::LD_Annn()
 {
-	I = opcode & 0x0fff
+	core.I = opcode & 0x0fff
 }
 
 void Chip8tleVM::JP_Bnnn() {
@@ -267,7 +345,7 @@ void Chip8tleVM::LD_Fx55() {
 		ext.rem[core.I+i] = V[i];
 	}
 	/* Store registers V0 through Vx in memory starting at location I.
-	The interpreter copies the values of registers V0 through Vx into memory, 
+	The interpRET_00EEer copies the values of registers V0 through Vx into memory, 
 	starting at the address in I.
 	*/
 }
