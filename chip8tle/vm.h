@@ -42,6 +42,7 @@ private:
 	void add1d();
 	void ld33();
 	void ld65();
+	void skp();
 };
 
 Chip8tleVM::Chip8tleVM() {
@@ -50,7 +51,7 @@ Chip8tleVM::Chip8tleVM() {
 	this->opcoder = {	// 5 x 7 !!!!
 		sys  , ret, call , sne_kk, ld_kk, 
 		ld_y0, And, addy4, shr   , shl  , 
-		ldnn, rnd, ld07, ld15, ld33
+		ldnn, rnd, ld07, ld15, ld33, skp
 	};
 	this->core = Chip8tleCore();
 	this->ext  = Chip8tleExt();
@@ -58,6 +59,14 @@ Chip8tleVM::Chip8tleVM() {
 }
 
 // Por aqui los metodos de cada opcode
+void Chip8tleVM::skp()
+{
+	if(ext.key[core.V[(opcode & 0x0f00)>>8]] == 1)
+	{
+		core.PC + 2;
+	}
+}
+
 void Chip8tleVM::ld65()
 {
 	for(int i = 0;i<=((opcode & 0x0f00) >> 8);i++)

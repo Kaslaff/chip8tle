@@ -35,6 +35,7 @@ class Chip8tleExt {
 public:
 	unsigned char rem[4096];					// Memory Ram 
 	unsigned char screen[SCREEN_H][SCREEN_W];	// Screen Pixels 
+	unsigned char key[16];						//key pressed
 };
 
 #endif
