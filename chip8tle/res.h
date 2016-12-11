@@ -20,21 +20,6 @@ class Chip8tleCore
 		//methods
 		 Chip8tleCore();
 		~Chip8tleCore();
-		//Opcodes
-		void (*opcoder[35])();
-
-	private:	
-		void sys();
-		void ret();
-		void call();
-		void sne_kk();
-		void ld_kk();
-		void ld_y0();
-		void And();
-		void addy4();
-		void shr();
-		void shl();
-		void ldnn();
 };
 
 Chip8tleCore::Chip8tleCore()
@@ -42,12 +27,6 @@ Chip8tleCore::Chip8tleCore()
 	PC = 0x200;
 	I = 0;
 	SP = 0;
-	opcode = 0;
-
-	opcoder =
-	{
-		sys, ret, call, sne_kk, ld_kk, ld_y0, And, addy4, shr, shl, ldnn
-	};
 }
 
 

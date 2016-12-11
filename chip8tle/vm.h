@@ -18,7 +18,8 @@ public:
 	Chip8tleCore core;	// Super Core
 	Chip8tleExt ext;	// External
 
-	// Por aqui deberia ir opcoder[35]
+	// Opcoder
+	unsigned short opcode 	//Opcode 	16bits
 	void (*opcoder[35])();
 
 private:	
@@ -36,8 +37,15 @@ private:
 };
 
 Chip8tleVM::Chip8tleVM() {
+	this->opcode  = 0;
+	this->opcoder = {	// 5 x 7 !!!!
+		sys  , ret, call , sne_kk, ld_kk, 
+		ld_y0, And, addy4, shr   , shl  , 
+		ldnn
+	};
 	this->core = Chip8tleCore();
-	// Y lo demas
+	this->ext  = Chip8tleExt();
+	// Y lo demas (Creo que mas nada)
 }
 
 // Por aqui los metodos de cada opcode
@@ -57,7 +65,7 @@ void Chip8tleVM::cls() {
 }
 
 void Chip8tleVM::jp() {
-	
+
 }
 
 void Chip8tleVM::ret()
