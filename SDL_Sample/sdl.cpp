@@ -19,7 +19,7 @@ SDL_Renderer* gRenderer = NULL;
 int main()
 {
 	SDL_Event e;
-	SDL_Rect *rect;
+	SDL_Rect *rect = new SDL_Rect;
 	bool quit = false;
 	bool directionx,directiony;
 
@@ -29,7 +29,6 @@ int main()
 	rect->h=20;
 
 	init();
-	std::cout<<""<<std::endl;
 
 	//While application is running
 	while( !quit )
@@ -82,6 +81,7 @@ int main()
 		SDL_RenderPresent( gRenderer );
 		SDL_Delay(10);
 	}
+	delete rect;
 	close();
 	return 0;
 }
