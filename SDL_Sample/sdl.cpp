@@ -1,7 +1,7 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 
-#define SCREEN_WIDTH 1280 	//x20	
+#define SCREEN_WIDTH 1280 	//x20
 #define SCREEN_HEIGHT 704 	//x22
 
 //Starts up SDL and creates window
@@ -29,7 +29,7 @@ int main()
 	rect->h=20;
 
 	init();
-	
+	std::cout<<""<<std::endl;
 
 	//While application is running
 	while( !quit )
@@ -51,7 +51,7 @@ int main()
 		SDL_SetRenderDrawColor( gRenderer, 0xff, 0xff, 0xff, 0xff);
 
 		if(rect->x == 0)
-		{			
+		{
 			directionx = true;
 		}
 		else if(rect->x == SCREEN_WIDTH-20)
@@ -60,7 +60,7 @@ int main()
 		}
 
 		if(rect->y == 0)
-		{			
+		{
 			directiony = true;
 		}
 		else if(rect->y == SCREEN_HEIGHT-20)
@@ -92,17 +92,17 @@ void init()
 	SDL_Init( SDL_INIT_VIDEO );
 
 	gWindow = SDL_CreateWindow("Chip8tle",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,SCREEN_WIDTH,SCREEN_HEIGHT,SDL_WINDOW_SHOWN);
-		
+
 	//Create renderer for window
 	gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED );
-	
+
 	//Initialize renderer color
 	SDL_SetRenderDrawColor( gRenderer, 0xff, 0xff, 0xff, 0xff);
 }
 
 void close()
 {
-	//Destroy window	
+	//Destroy window
 	SDL_DestroyRenderer( gRenderer );
 	SDL_DestroyWindow( gWindow );
 	gWindow = NULL;
