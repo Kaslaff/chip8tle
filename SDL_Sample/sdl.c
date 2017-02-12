@@ -19,7 +19,7 @@ SDL_Renderer* gRenderer = NULL;
 int main()
 {
 	SDL_Event e;
-	SDL_Rect *rect;
+	SDL_Rect *rect = NULL;
 	int quit = 0;
 	int directionx,directiony;
 
